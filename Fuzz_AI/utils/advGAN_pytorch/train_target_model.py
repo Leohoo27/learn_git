@@ -1,3 +1,6 @@
+"""
+usage: python3 train_target_model.py --batch_size 32 --num_classes 10 --model_name alexnet --epochs 20 --data_root_path ../../../datasets/office_caltech/caltech/
+"""
 from torchvision import models
 import torch
 import argparse
@@ -9,8 +12,7 @@ import tqdm
 import copy
 
 from torchvision import transforms, datasets
-from utils.data_loader import load_data
-
+from progress.bar import Bar
 
 parser = argparse.ArgumentParser(description='Target Model Training')
 # params necessary
@@ -20,16 +22,16 @@ parser.add_argument('--batch_size', type=int, default=64, metavar='N',
 parser.add_argument('--num_classes', type=int, default=10, metavar='N',
                     help='number of classes for training (default: 10)')
 
-parser.add_argument('--model_name', type=str, default='squeezenet',
+parser.add_argument('--model_name', type=str, default=None,
                     help='model name of the target')
 
 parser.add_argument('--epochs', type=int, default=100, metavar='N',
                     help='number of epochs to train (default: 100)')
 
-parser.add_argument('--root_path', type=str, default='../../datasets/office_caltech/caltech/',
+parser.add_argument('--data_root_path', type=str, default='../../datasets/office_caltech/caltech/',
                     help='the path to load the data')
 
-parser.add_argument('--save_path', type=str, default='./models_office_caltech',
+parser.add_argument('--model_save_path', type=str, default='./',
                     help='the path to save the target model')
 
 parser.add_argument('--seed', type=int, default=233, metavar='S',
@@ -46,6 +48,8 @@ args.cuda = not args.no_cuda and torch.cuda.is_available()
 DEVICE = torch.device('cuda:' + str(args.gpu) if torch.cuda.is_available() else 'cpu')
 torch.cuda.manual_seed(args.seed)
 kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
+
+feature_extract = True
 
 
 def load_data(input_size):
@@ -65,7 +69,7 @@ def load_data(input_size):
         ]),
     }
 
-    image_datasets = {x: datasets.ImageFolder(os.path.join(args.root_path, x),
+    image_datasets = {x: datasets.ImageFolder(os.path.join(args.data_root_path, x),
                                               data_transforms[x])
                       for x in ['train', 'test']}
     data_loaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=args.batch_size,
@@ -85,6 +89,7 @@ def model_training(model, data_loaders, dataset_sizes):
     :return:
     """
 
+    best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
 
     for epoch in range(args.epochs):
@@ -100,10 +105,7 @@ def model_training(model, data_loaders, dataset_sizes):
             running_loss = 0.0
             running_corrects = 0
 
-            for batch_idx, (inputs, labels) in tqdm.tqdm(enumerate(data_loaders[phase]),
-                                                         total=dataset_sizes[phase],
-                                                         desc='Train epoch = {}'.format(epoch),
-                                                         ncols=80, leave=False):
+            for batch_idx, (inputs, labels) in enumerate(data_loaders[phase]):
                 inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
 
                 criterion = nn.CrossEntropyLoss()
@@ -136,8 +138,8 @@ def model_training(model, data_loaders, dataset_sizes):
 
                 best_model_wts = copy.deepcopy(model.state_dict())
                 model.load_state_dict(best_model_wts)  # success or not
-                model_saved_path = os.path.join(args.save_path, 'target_' + args.model_name + '.pt')
-                torch.save(model, model_saved_path)
+                model_saved_path = os.path.join(args.model_save_path, args.model_name + '_target_model.pth')
+                torch.save(model.state_dict(), model_saved_path)
 
         print()
 
@@ -188,7 +190,7 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
     input_size = 0
 
     if model_name == "resnet":
-        """Resnet18
+        """ Resnet18
         """
         model_ft = models.resnet18(pretrained=use_pretrained)
         set_parameter_requires_grad(model_ft, feature_extract)
@@ -256,7 +258,7 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
 if __name__ == '__main__':
 
     # Initialize the target model for this run
-    model, input_size = initialize_model(args.model_name, args.num_classes, feature_extract=True, use_pretrained=True)
+    model, input_size = initialize_model(args.model_name, args.num_classes, feature_extract, use_pretrained=True)
     model.to(DEVICE)
     # Print the model we just instantiated
     print(model)
