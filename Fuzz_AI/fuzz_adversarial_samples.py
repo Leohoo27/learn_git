@@ -1,6 +1,5 @@
 """usage:
-python3 fuzz_adversarial_samples.py --batch_size 32 --model_type 1 --models_path ./models/models_office_caltech
---seeds_path ./data/adversarial_seeds/ --output_path ./data/generated_fuzz_samples_with_advGAN/
+python3 fuzz_adversarial_samples.py --batch_size 32 --model_type 1 --models_path ./models/models_office_caltech/ --input_data ./data/adversarial_seeds_test/ --output_path ./data/generated_fuzz_samples_test/
 """
 from torchvision import models
 import torch
@@ -21,7 +20,7 @@ parser.add_argument('--batch_size', type=int, default=64, metavar='N',
 parser.add_argument('--model_type', type=int, default=1, choices=[0, 1],
                     help='model type for fuzzing (normal DNN: 0, transfer learning: 1)')
 
-parser.add_argument('--input_path', type=str, default=None,
+parser.add_argument('--input_data', type=str, default=None,
                     help='path of image seeds data')
 
 parser.add_argument('--output_path', type=str, default=None,
@@ -67,7 +66,7 @@ def load_model():
 
 def main():
 
-    data_loader, class_to_idx, dataset_sizes = load_data(data_folder=args.seeds_path, batch_size=1,
+    data_loader, class_to_idx, dataset_sizes = load_data(data_folder=args.input_data, batch_size=1,
                                           train_flag=False, kwargs={'num_workers': 0})
 
     # models for fuzzing: alexnet, vgg19, mobilenet_v2, vgg16

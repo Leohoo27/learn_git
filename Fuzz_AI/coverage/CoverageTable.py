@@ -12,8 +12,8 @@ class CoverageTableInit():
         :param model: DNN model (AlexNet, VGG)
         :return: 1. model layer dict. 2. each layer name
         """
-        model_layer_dict = collections.OrderedDict(bool)
-        layer_names = collections.OrderedDict()
+        model_layer_dict = collections.defaultdict(bool)
+        layer_names = {}
 
         for idx, (name, item) in enumerate(model.named_modules()):
 

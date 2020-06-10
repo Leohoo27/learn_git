@@ -21,13 +21,13 @@ class Fuzzer(object):
         self.model_2 = models[1]
         self.model_3 = models[2]
 
-        self.model_layer_dicts_1 = model_layer_dicts[0]
-        self.model_layer_dicts_2 = model_layer_dicts[1]
-        self.model_layer_dicts_3 = model_layer_dicts[2]
+        self.model_layer_dict_1 = model_layer_dicts[0]
+        self.model_layer_dict_2 = model_layer_dicts[1]
+        self.model_layer_dict_3 = model_layer_dicts[2]
 
-        self.model_layer_names_1 = model_layer_names[0]
-        self.model_layer_names_2 = model_layer_names[1]
-        self.model_layer_names_3 = model_layer_names[2]
+        self.model_layer_name_1 = model_layer_names[0]
+        self.model_layer_name_2 = model_layer_names[1]
+        self.model_layer_name_3 = model_layer_names[2]
 
         self.iters_num = 50
 
@@ -66,11 +66,11 @@ class Fuzzer(object):
                     pred_1, pred_2, pred_3) + bcolors.ENDC)
 
                 self.model_layer_dict_1 = update_coverage.update_nc_coverage(
-                    self.model_1, image.to(self.device), self.model_layer_dict_1, self.model_layer_names_1, threshold=0)
+                    self.model_1, image.to(self.device), self.model_layer_dict_1, self.model_layer_name_1, threshold=0)
                 self.model_layer_dict_2 = update_coverage.update_nc_coverage(
-                    self.model_2, image.to(self.device), self.model_layer_dict_2, self.model_layer_names_2, threshold=0)
+                    self.model_2, image.to(self.device), self.model_layer_dict_2, self.model_layer_name_2, threshold=0)
                 self.model_layer_dict_3 = update_coverage.update_nc_coverage(
-                    self.model_3, image.to(self.device), self.model_layer_dict_3, self.model_layer_names_3, threshold=0)
+                    self.model_3, image.to(self.device), self.model_layer_dict_3, self.model_layer_name_3, threshold=0)
 
                 covered_neurons_1, total_neurons_1, covered_neurons_rate_1 = update_coverage.neuron_covered(
                     self.model_layer_dict_1)
@@ -102,11 +102,11 @@ class Fuzzer(object):
                 layer_name_3, index_3 = update_coverage.neuron_to_cover(self.model_layer_dict_3)
 
                 loss1_neuron = torch.mean(
-                    self.model_layer_names_1.get(layer_name_1).state_dict().get('weight')[index_1, ...])
+                    self.model_layer_name_1.get(layer_name_1).state_dict().get('weight')[index_1, ...])
                 loss2_neuron = torch.mean(
-                    self.model_layer_names_2.get(layer_name_2).state_dict().get('weight')[index_2, ...])
+                    self.model_layer_name_2.get(layer_name_2).state_dict().get('weight')[index_2, ...])
                 loss3_neuron = torch.mean(
-                    self.model_layer_names_3.get(layer_name_3).state_dict().get('weight')[index_3, ...])
+                    self.model_layer_name_3.get(layer_name_3).state_dict().get('weight')[index_3, ...])
 
                 for iter in range(1, self.iters_num + 1):
 
@@ -146,15 +146,15 @@ class Fuzzer(object):
 
                         self.model_layer_dict_1 = update_coverage.update_nc_coverage(
                             self.model_1, image.to(self.device), self.model_layer_dict_1,
-                            self.model_layer_names_1, threshold=0)
+                            self.model_layer_name_1, threshold=0)
 
                         self.model_layer_dict_2 = update_coverage.update_nc_coverage(
                             self.model_2, image.to(self.device), self.model_layer_dict_2,
-                            self.model_layer_names_2, threshold=0)
+                            self.model_layer_name_2, threshold=0)
 
                         self.model_layer_dict_3 = update_coverage.update_nc_coverage(
                             self.model_3, image.to(self.device), self.model_layer_dict_3,
-                            self.model_layer_names_3, threshold=0)
+                            self.model_layer_name_3, threshold=0)
 
                         covered_neurons_1, total_neurons_1, covered_neurons_rate_1 = update_coverage.neuron_covered(
                             self.model_layer_dict_1)

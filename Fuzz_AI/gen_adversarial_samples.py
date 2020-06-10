@@ -19,10 +19,10 @@ parser.add_argument('--batch_size', type=int, default=64, metavar='N',
 parser.add_argument('--input_data', type=str, default='/home/leohoo/work/code/tlfuzz/datasets/office_caltech/caltech/test',
                     help='input data dir to generate adversarial samples')
                     
-parser.add_argument('--input_model', type=str, default='./model/models_office_caltech/resnet50_amazon_caltech.model.pt',
+parser.add_argument('--input_model', type=str, default='./models/models_office_caltech/resnet50_amazon_caltech.model.pt',
                     help='source model to generate adversarial samples')
                     
-parser.add_argument('--target_model', type=str, default='./model/models_office_caltech/target_densenet121.pt',
+parser.add_argument('--target_model', type=str, default='./models/models_office_caltech/target_densenet121.pt',
                     help='target model to be attacked')
                     
 parser.add_argument('--output_path', type=str, default="./data/adversarial_seeds",
@@ -49,7 +49,7 @@ kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
 
 def main_advertorch():
 
-    data_loaders, dataset_sizes, class_to_idx = load_data(args.test_data, args.batch_size, train_flag=False, kwargs=kwargs)
+    data_loaders, class_to_idx, dataset_sizes = load_data(args.input_data, args.batch_size, train_flag=False, kwargs=kwargs)
     print('length of dataset: {}'.format(dataset_sizes))
 
     if args.model_type == 0:
