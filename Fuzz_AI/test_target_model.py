@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """usage:
-python3 test_target_model.py --batch_size 32 --target_model ./models/models_office_caltech/target_densenet121.pt --test_data_path ./data/adversarial_seeds/
+python3 test_target_model.py --batch_size 32 --target_model ./models/models_office_caltech/target_densenet121.pt --test_data ./data/adversarial_seeds/
 """
 import torch
 import argparse
@@ -32,13 +32,14 @@ kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
 
 
 def model_test():
+    print()
     print('############ offline testing ############')
     print()
 
     model = torch.load(args.target_model)
     model = model.eval()
 
-    data_loaders, dataset_sizes, class_to_idx = load_data(args.test_data_path, args.batch_size, train_flag=False, kwargs=kwargs)
+    data_loaders, class_to_idx, dataset_sizes = load_data(args.test_data, args.batch_size, train_flag=False, kwargs=kwargs)
     print('number of the adversarial samples: {}'.format(dataset_sizes))
 
     correct = 0

@@ -1,5 +1,5 @@
 """usage:
-python3 fuzz_adversarial_samples.py --batch_size 32 --model_type 1 --models_path ./models/models_office_caltech/ --input_data ./data/adversarial_seeds_test/ --output_path ./data/generated_fuzz_samples_test/
+python3 fuzz_adversarial_samples.py --batch_size 32 --model_type 1 --models_path ./models/models_office_caltech/ --input_data ./data/adversarial_seeds/ --output_path ./data/generated_fuzz_samples_from_advertorch/
 """
 from torchvision import models
 import torch

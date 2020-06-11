@@ -73,11 +73,13 @@ def load_data_with_transform(data_folder, batch_size, train_flag, kwargs):
              transforms.ToTensor(),
              transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                   std=[0.229, 0.224, 0.225])],
-            # transforms.RandomErasing(ratio=(0.1, 0.2), value='random'),
+             transforms.RandomErasing(ratio=(0.1, 0.2), value='random'),
         )
     }
     data = datasets.ImageFolder(root=data_folder, transform=transform['train' if train_flag else 'test'])
     data_loader = torch.utils.data.DataLoader(data, batch_size=batch_size, shuffle=True, **kwargs,
                                               drop_last=True if train_flag else False)
 
-    return data_loader, data.class_to_idx
+    dataset_sizes = len(data)
+
+    return data_loader, data.class_to_idx, dataset_sizes

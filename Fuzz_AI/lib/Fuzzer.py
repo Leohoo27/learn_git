@@ -5,7 +5,7 @@ import os
 
 from coverage import CoverageUpdate
 from utils.config import bcolors
-from utils.mutators import constraint_black, constraint_occl
+from utils.mutators import constraint_black, constraint_occl, image_noise, image_blur
 
 
 class Fuzzer(object):
@@ -89,7 +89,7 @@ class Fuzzer(object):
                 print(bcolors.OKGREEN + 'averaged covered neurons %.3f' % averaged_nc + bcolors.ENDC)
 
                 # save already causes different outputs
-                torchvision.utils.save_image(image, os.path.join(image_dir, str(idx) + '.jpg'),
+                torchvision.utils.save_image(image, os.path.join(image_dir, 'already_diff_' + str(idx) + '.jpg'),
                                              normalize=True, scale_each=True)
                 continue
 
@@ -123,10 +123,17 @@ class Fuzzer(object):
 
                     # mutation strategy
                     # grads_value = constraint_black(gradients=grads)
-                    grads_value = constraint_occl(gradients=grads, start_point=(0, 0),
-                                                  rect_shape=(50, 50))
+                    grads_value = constraint_occl(gradients=grads, start_point=(0, 0), rect_shape=(50, 50))
                     # perturb noise to image
-                    image = torch.tensor(torch.add(image, grads_value * 1.0), requires_grad=True)
+                    complex_perturb = True
+                    if complex_perturb:
+                        image = torch.add(image, grads_value * 1.0)
+                        param_noise = 5 
+                        image = image_noise(image, param_noise, grads)
+                        image = torch.tensor(image.data, dtype=torch.float, requires_grad=True)
+                    
+                    else:
+                        image = torch.tensor(torch.add(image, grads_value * 1.0), requires_grad=True)
 
                     if self.model_type == 0:
                         output_1, output_2, output_3 = self.model_1(image.to(self.device)), \
@@ -182,9 +189,9 @@ class Fuzzer(object):
                     elif iter < self.iters_num:
                         print("Not predict_1 != predict_2 != predict_3! Keep continue!\n")
 
-                    elif iter > self.iters_num:
+                    elif iter >= self.iters_num:
                         print("Over {} times fuzz iteration.".format(self.iters_num))
-                        image_name = str(idx) + '.jpg'
-                        torchvision.utils.save_image(image, os.path.join(image_dir, str(idx) + '.jpg'),
+                        image_name = 'still_same_' + str(idx) + '.jpg'
+                        torchvision.utils.save_image(image, os.path.join(image_dir, image_name),
                                                      normalize=True, scale_each=True)
         return 0
